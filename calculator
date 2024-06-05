@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedtime Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="number"],
+        input[type="time"] {
+            width: 200px;
+        }
+        input[type="submit"] {
+            margin-top: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bedtime Calculator</h1>
+    <form id="bedtimeForm">
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required min="0" max="120">
+        <label for="wakeUpTime">Wake-Up Time:</label>
+        <input type="time" id="wakeUpTime" name="wakeUpTime" required>
+        <input type="submit" value="Calculate Bedtime">
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('bedtimeForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const age = parseInt(document.getElementById('age').value);
+            const wakeUpTime = document.getElementById('wakeUpTime').value;
+            calculateBedtime(age, wakeUpTime);
+        });
+
+        function calculateBedtime(age, wakeUpTime) {
+            const sleepData = getSleepData(age);
+            const wakeUpDateTime = new Date(`1970-01-01T${wakeUpTime}:00`);
+            const lowerBedtime = new Date(wakeUpDateTime.getTime() - sleepData.lower * 3600000);
+            const upperBedtime = new Date(wakeUpDateTime.getTime() - sleepData.upper * 3600000);
+
+            document.getElementById('result').innerHTML = `
+                <p>Recommended sleep: ${sleepData.lower} to ${sleepData.upper} hours</p>
+                <p>Nap times: ${sleepData.naps}</p>
+                <p>Suggested bedtimes:
+                    <br>Lower range: ${formatTime(lowerBedtime)}
+                    <br>Higher range: ${formatTime(upperBedtime)}
+                </p>`;
+        }
+
+        function getSleepData(age) {
+            if (age >= 0 && age <= 4) {
+                return { lower: 12, upper: 16, naps: 'N/A' };
+            } else if (age >= 4 && age <= 6) {
+                return { lower: 12, upper: 16, naps: '4 naps, 4-5 hours total daytime sleep' };
+            } else if (age >= 6 && age <= 9) {
+                return { lower: 12, upper: 16, naps: '3 naps, 3-4 hours of daytime sleep' };
+            } else if (age >= 9 && age <= 16) {
+                return { lower: 12, upper: 16, naps: '2 naps, 2-3 hours of daytime sleep' };
+            } else if (age >= 16 && age <= 24) {
+                return { lower: 11, upper: 14, naps: '1 nap, 2-3 hours of daytime sleep' };
+            } else if (age >= 24 && age <= 30) {
+                return { lower: 10, upper: 13, naps: '1 nap, up to 2 hours of sleep' };
+            } else if (age >= 30 && age <= 36) {
+                return { lower: 9, upper: 12, naps: '0-1 nap, up to 2 hours of sleep' };
+            } else if (age >= 36 && age <= 216) {
+                return { lower: 8, upper: 10, naps: 'N/A' };
+            } else {
+                return { lower: 7, upper: 7, naps: 'N/A' };
+            }
+        }
+
+        function formatTime(date) {
+            let hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+            return hours + ':' + minutesStr + ' ' + ampm;
+        }
+    </script>
+</body>
+</html>
